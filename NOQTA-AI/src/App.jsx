@@ -1,16 +1,15 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Welcome from "./pages/Welcome"; 
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <h1 className="font-sora text-3xl font-semibold bg-gradient-to-r from-nova to-azure text-transparent bg-clip-text">NOQTA-AI</h1>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Welcome />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App
