@@ -1,20 +1,23 @@
 import { create } from "zustand";
 
-export const useNotesStore = create((set) => ({
+export const useNotesStore = create((set, get) => ({
   notes: JSON.parse(localStorage.getItem("notes")) || [],
-  addNote: (note) => set((state) => {
-    const updated = [...state.notes, note];
-    localStorage.setItem("notes", JSON.stringify(updated));
-    return { notes: updated };
-  }),
-  deleteNote: (id) => set((state) => {
-    const updated = state.notes.filter(n => n.id !== id);
-    localStorage.setItem("notes", JSON.stringify(updated));
-    return { notes: updated };
-  }),
-  updateNote: (id, data) => set((state) => {
-    const updated = state.notes.map(n => n.id === id ? {...n, ...data} : n);
-    localStorage.setItem("notes", JSON.stringify(updated));
-    return { notes: updated };
-  }),
+
+  addNote: (note) => {
+    const newNotes = [...get().notes, note];
+    localStorage.setItem("notes", JSON.stringify(newNotes));
+    set({ notes: newNotes });
+  },
+
+  updateNote: (id, updated) => {
+    const newNotes = get().notes.map((n) => (n.id === id ? { ...n, ...updated } : n));
+    localStorage.setItem("notes", JSON.stringify(newNotes));
+    set({ notes: newNotes });
+  },
+
+  deleteNote: (id) => {
+    const newNotes = get().notes.filter((n) => n.id !== id);
+    localStorage.setItem("notes", JSON.stringify(newNotes));
+    set({ notes: newNotes });
+  },
 }));
