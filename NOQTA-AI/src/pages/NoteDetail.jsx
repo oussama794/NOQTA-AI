@@ -41,7 +41,7 @@ export default function NoteDetail() {
     const displayContent = note.content || "Click to edit...";
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-serene to-zenith p-3 sm:p-6 flex items-start sm:items-center justify-center">
+        <div className="min-h-screen bg-gradient-to-b from-serene to-zenith p-3 sm:p-6 flex items-center justify-center">
             <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 max-w-2xl w-full relative min-h-[400px] my-4 sm:my-0">
                 {/* Header with Return Button */}
                 <div className="flex items-center gap-3 mb-4">
