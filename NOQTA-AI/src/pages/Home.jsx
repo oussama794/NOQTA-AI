@@ -1,5 +1,6 @@
 import NoteCard from "../components/NoteCard";
 import AddNoteFAB from "../components/AddNoteFAB";
+import DarkModeToggle from "../components/DarkModeToggle";
 import { useNotesStore } from "../store/notesStore";
 import { useState } from "react";
 import { Search } from "lucide-react";
@@ -9,16 +10,35 @@ export default function Home() {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState("All");
 
-    const filteredNotes = notes.filter((n) =>
-        n.title.toLowerCase().includes(search.toLowerCase())
-    );
+    const normalizedSearch = search.trim().toLowerCase();
+    const filteredNotes = notes.filter((n) => {
+        const matchesSearch = n.title.toLowerCase().includes(normalizedSearch);
+        const noteCategory = n.category || "All";
+        const matchesCategory = filter === "All" ? true : noteCategory === filter;
+        return matchesSearch && matchesCategory;
+    });
 
-    const filters = ["All", "Work", "Ideas", "Personal", "AI"];
+    const baseCategories = ["All", "Work", "Ideas", "Personal", "AI", "Sport", "Study"];
+    const noteCategories = Array.from(new Set(
+        notes
+            .map((n) => n.category)
+            .filter((c) => c && c !== "All")
+    ));
+    const filters = [
+        "All",
+        ...baseCategories.filter((c) => c !== "All"),
+        ...noteCategories.filter((c) => !baseCategories.includes(c)),
+    ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-serene to-zenith px-4 py-6">
+        <div className="min-h-screen bg-gradient-to-b from-serene to-zenith px-4 py-6 dark:from-gray-900 dark:to-gray-950">
+            {/* Dark Mode Toggle */}
+            <div className="flex">
+                <DarkModeToggle />
+            </div>
+
             {/* App Title */}
-            <h1 className="text-center text-3xl font-bold text-nova mb-4">NOQTA</h1>
+            <h1 className="text-center text-3xl font-bold text-nova mb-4 dark:text-white">NOQTA</h1>
 
             {/* Search Bar */}
             <div className="flex items-center justify-center mb-3">
@@ -29,20 +49,20 @@ export default function Home() {
                         placeholder="Search for notes..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full bg-white text-gray-700 rounded-xl pl-10 pr-3 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-nova"
+                        className="w-full bg-white text-gray-700 rounded-xl pl-10 pr-3 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-nova dark:bg-gray-800 dark:text-gray-200 dark:placeholder-gray-400 dark:focus:ring-azure"
                     />
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="flex justify-center gap-2 mb-5 flex-wrap">
+            <div className="flex gap-2 mb-5 overflow-x-auto whitespace-nowrap py-1 w-full justify-start lg:justify-center">
                 {filters.map((cat) => (
                     <button
                         key={cat}
                         onClick={() => setFilter(cat)}
-                        className={`px-3 py-1 text-sm rounded-full border ${filter === cat
+                        className={`flex-shrink-0 px-3 py-1 text-sm rounded-full border ${filter === cat
                             ? "bg-nova text-white border-nova"
-                            : "border-zenith text-gray-600"
+                            : "border-zenith text-gray-600 dark:border-gray-700 dark:text-gray-300"
                             } transition`}
                     >
                         {cat}
@@ -55,7 +75,7 @@ export default function Home() {
                 {filteredNotes.length > 0 ? (
                     filteredNotes.map((note) => <NoteCard key={note.id} note={note} />)
                 ) : (
-                    <p className="text-center col-span-2 md:col-span-3 lg:col-span-4 text-gray-500">No notes yet.</p>
+                    <p className="text-center col-span-2 md:col-span-3 lg:col-span-4 text-gray-500 dark:text-gray-400">No notes yet.</p>
                 )}
             </div>
 
