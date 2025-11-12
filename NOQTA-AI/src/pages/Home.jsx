@@ -3,12 +3,13 @@ import AddNoteFAB from "../components/AddNoteFAB";
 import DarkModeToggle from "../components/DarkModeToggle";
 import { useNotesStore } from "../store/notesStore";
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Settings } from "lucide-react";
 
 export default function Home() {
     const { notes } = useNotesStore();
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState("All");
+    const [showSettings, setShowSettings] = useState(false);
 
     const normalizedSearch = search.trim().toLowerCase();
     const filteredNotes = notes.filter((n) => {
@@ -32,8 +33,16 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-serene to-zenith px-4 py-6 dark:from-gray-900 dark:to-gray-950">
-            {/* Dark Mode Toggle */}
-            <div className="flex">
+            {/* Top Bar with Dark Mode Toggle and Settings */}
+            <div className="flex justify-between items-center mb-2">
+                <button
+                    onClick={() => setShowSettings(true)}
+                    className="flex items-center gap-2 rounded-full border px-3 py-1 text-sm shadow-sm transition hover:scale-105 bg-white border-zenith text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                    title="API Settings"
+                >
+                    <Settings size={16} />
+                    <span>API Key</span>
+                </button>
                 <DarkModeToggle />
             </div>
 
@@ -81,6 +90,7 @@ export default function Home() {
 
             {/* Add Note FAB */}
             <AddNoteFAB />
+            
         </div>
     );
 }
