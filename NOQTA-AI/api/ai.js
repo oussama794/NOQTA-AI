@@ -1,66 +1,61 @@
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import axios from "axios";
 
 export default async function handler(req, res) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { action, text } = req.body;
-
-  // Validate input
-  if (!text || typeof text !== 'string' || text.trim() === '') {
-    return res.status(400).json({ error: 'Text is required' });
-  }
-
   try {
-    // Build prompt based on action
-    let prompt;
-    switch (action) {
-      case 'summarize':
-        prompt = `Summarize this:\n\n${text}`;
-        break;
-      case 'rephrase':
-        prompt = `Rephrase this:\n\n${text}`;
-        break;
-      case 'complete':
-        prompt = `Complete this text naturally:\n\n${text}`;
-        break;
-      default:
-        prompt = text;
+    if (req.method !== "POST")
+      return res.status(405).json({ error: "Method not allowed" });
+
+    const { action, text } = req.body;
+    if (!text) return res.status(400).json({ error: "Missing text" });
+
+    // Map actions to free-friendly models
+    let HF_MODEL;
+    let prompt = text;
+
+    if (action === "summarize") {
+      HF_MODEL = "facebook/bart-large-cnn";
+      prompt = text;
+    } else if (action === "rephrase") {
+      HF_MODEL = "t5-small";
+      prompt = `paraphrase: ${text}`;
+    } else if (action === "complete") {
+      HF_MODEL = "gpt2";
+      prompt = text;
+    } else {
+      return res.status(400).json({ error: "Unknown action" });
     }
 
-    // Call OpenAI API
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
+    const HF_API_KEY = process.env.HF_API_KEY;
+    if (!HF_API_KEY) return res.status(500).json({ error: "HF_API_KEY missing" });
+
+    const hfResponse = await axios.post(
+      `https://api-inference.huggingface.co/models/${HF_MODEL}`,
+      { inputs: prompt },
+      {
+        headers: {
+          Authorization: `Bearer ${HF_API_KEY}`,
+          "Content-Type": "application/json",
         },
-      ],
-      temperature: 0.7,
-      max_tokens: 500,
-    });
+        timeout: 200000,
+      }
+    );
 
-    const result = completion.choices[0].message.content;
-
-    return res.status(200).json({ result });
-  } catch (error) {
-    console.error('OpenAI API error:', error);
-    
-    // Handle specific OpenAI errors
-    if (error.status === 401) {
-      return res.status(500).json({ error: 'Invalid API key' });
+    // Handle model loading errors
+    if (hfResponse.data.error) {
+      return res.status(503).json({ error: hfResponse.data.error });
     }
-    
-    return res.status(500).json({ 
-      error: 'Failed to process request',
-      details: error.message 
-    });
+
+    // Extract generated text
+    let result = "";
+    if (Array.isArray(hfResponse.data)) {
+      result = hfResponse.data[0]?.generated_text || "";
+    } else if (hfResponse.data.generated_text) {
+      result = hfResponse.data.generated_text;
+    }
+
+    res.status(200).json({ result });
+  } catch (err) {
+    console.error("HF API Error:", err.response?.data || err.message);
+    res.status(500).json({ error: err.response?.data || err.message || "Server Error" });
   }
 }
