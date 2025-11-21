@@ -33,21 +33,13 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-serene to-zenith px-4 py-6 dark:from-gray-900 dark:to-gray-950">
-            {/* Top Bar with Dark Mode Toggle and Settings */}
+            {/* Top Bar with Dark Mode Toggle*/}
             <div className="flex justify-between items-center mb-2">
-                <button
-                    onClick={() => setShowSettings(true)}
-                    className="flex items-center gap-2 rounded-full border px-3 py-1 text-sm shadow-sm transition hover:scale-105 bg-white border-zenith text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
-                    title="API Settings"
-                >
-                    <Settings size={16} />
-                    <span>API Key</span>
-                </button>
                 <DarkModeToggle />
             </div>
 
             {/* App Title */}
-            <h1 className="text-center text-3xl font-bold text-nova mb-4 dark:text-white">NOQTA</h1>
+            <h1 className="text-center text-3xl font-bold text-nova mb-4 dark:text-white">NOQTA-AI</h1>
 
             {/* Search Bar */}
             <div className="flex items-center justify-center mb-3">
